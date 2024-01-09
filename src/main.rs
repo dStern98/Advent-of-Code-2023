@@ -4,6 +4,7 @@ use std::io::BufReader;
 
 mod day1;
 mod day15;
+mod day19;
 mod day2;
 mod day4;
 mod day5;
@@ -33,6 +34,6 @@ trait SolveAdvent {
 }
 
 fn main() {
-    day15::Day15::solve_part1("input.txt");
-    day15::Day15::solve_part2("input.txt");
+    day19::Day19::solve_part1("input.txt");
+    day19::Day19::solve_part2("input.txt");
 }

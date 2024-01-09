@@ -19,7 +19,7 @@ impl SolveAdvent for Day15 {
         let init_sequence = file_as_str.split(",");
 
         //Intialize the lens_map to contain all empty boxes from 0..255
-        let mut lens_map = HashMap::new();
+        let mut lens_map = HashMap::with_capacity(256);
         for i in 0..256 {
             lens_map.insert(i, Vec::new());
         }
