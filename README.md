@@ -21,4 +21,28 @@ where the two methods each take the file path to the input.
 
 #### Python Solutions
 
-If a solution is written in Python, then directly pass the file name to the interpreter to run it.
+Similar to the Rust solutions, the Python solutions are in the `./advent_python` folder. Because of the `__main__.py` file,
+the module can be directly invoked using the command `python -m advent_python`. All Python solutions inherit from an abstract base class in the `base.py` file, and must inherit from the following class:
+
+```
+
+class SolveAdvent(ABC):
+    def __init__(self, file_path: str):
+        with open(file_path, "r") as file:
+            file_content = file.readlines()
+        self.file_content = file_content
+
+    @abstractmethod
+    def solve_part1(self):
+        """
+        Solve Part1 of the Days Advent Problem
+        """
+        pass
+
+    @abstractmethod
+    def solve_part2(self):
+        """
+        Solve Part2 of the Days Advent Problem.
+        """
+        pass
+```
