@@ -1,5 +1,24 @@
 from .base import SolveAdvent
+from dataclasses import dataclass
 from typing import Optional, Literal
+
+
+@dataclass
+class PatternScore:
+    """
+    Represents a known mirror location for a given pattern.
+    The `type` specifies whether the mirror is horizontal or vertical.
+    The `position` specifies the row/column where the reflection occurs.
+    """
+    type: Literal["horizontal", "vertical"]
+    position: int
+
+    @property
+    def points(self):
+        if self.type == "horizontal":
+            return self.position * 100
+        else:
+            return self.position
 
 
 class SolveDay13(SolveAdvent):
@@ -9,12 +28,10 @@ class SolveDay13(SolveAdvent):
             pattern_parsed = [[char for char in row]
                               for row in pattern.split("\n")]
             if vertical_mirror_score := find_vertical_mirror_score(pattern_parsed):
-                (_, vertical_score) = vertical_mirror_score
-                total_pattern_score += vertical_score
+                total_pattern_score += vertical_mirror_score.points
                 continue
             if horizontal_mirror_score := find_horizontal_mirror_score(pattern_parsed):
-                (_, horizontal) = horizontal_mirror_score
-                total_pattern_score += horizontal
+                total_pattern_score += horizontal_mirror_score.points
                 continue
         print(
             f"Total Pattern Score from Mirror Analysis: {total_pattern_score}")
@@ -101,7 +118,7 @@ def find_mirror_by_fixing_smudge(pattern_parsed: list[list[str]]) -> int:
 
 
 def compute_new_mirror_score(
-        old_reflection: tuple[int, int] | None,
+        old_reflection: PatternScore | None,
         pattern_parsed_clone: list[list[str]],
         mode: Literal["horizontal", "vertical"]) -> int | None:
     """
@@ -111,37 +128,37 @@ def compute_new_mirror_score(
     because the instructions ask to only return the new_position if it does not equal
     the original position.
     """
-    original_position = None if old_reflection is None else old_reflection[0]
+    original_position = None if old_reflection is None else old_reflection.position
     mirror_location_func = find_horizontal_mirror_score if mode == "horizontal" else find_vertical_mirror_score
     # Find the new_reflection (which does not need to exist)
     new_reflection = mirror_location_func(
         pattern_parsed_clone, original_position)
     if new_reflection:
-        (new_position, new_score) = new_reflection
         if not old_reflection:
             # If the old_reflection is None, and new_reflection exists,
             # then we are done.
-            return new_score
+            return new_reflection.points
         # Otherwise, only return the new_score if the old_position does not equal the new_position.
-        (old_position, _) = old_reflection
-        if old_position != new_position:
-            return new_score
+        if old_reflection.position != new_reflection.position:
+            return new_reflection.points
 
 
 def find_vertical_mirror_score(
         pattern_parsed: list[list[str]],
         original_position: Optional[int] = None
-) -> tuple[int, int] | None:
+) -> PatternScore | None:
     """
     Finds a vertical reflection, returning the column where the reflection is valid, and the score.
     """
     if vertical_mirror_position := find_mirror_position_in_pattern(pattern_parsed, original_position):
-        return (vertical_mirror_position, vertical_mirror_position)
+        return PatternScore(
+            type="vertical",
+            position=vertical_mirror_position)
 
 
 def find_horizontal_mirror_score(
         pattern_parsed: list[list[str]],
-        original_position: Optional[int] = None) -> tuple[int, int] | None:
+        original_position: Optional[int] = None) -> PatternScore | None:
     """
     Finds a horizontal reflection, returning the row where the reflection is valid
     and the score.
@@ -152,7 +169,10 @@ def find_horizontal_mirror_score(
                                  for pattern in zip(*pattern_parsed)]
     if horizontal_mirror_position := find_mirror_position_in_pattern(pattern_parsed_transposed, original_position):
         # As the directions explain, the score for a horizontal mirror is 100x the mirror position.
-        return (horizontal_mirror_position, 100 * horizontal_mirror_position)
+        return PatternScore(
+            type="horizontal",
+            position=horizontal_mirror_position
+        )
 
 
 def find_mirror_position_in_pattern(
