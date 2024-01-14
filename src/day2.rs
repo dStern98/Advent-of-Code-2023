@@ -40,7 +40,7 @@ fn possible_game_part1(line: &str) -> isize {
         let mut red_count = 12;
         let mut green_count = 13;
         let mut blue_count = 14;
-        let cubes_shown = reveal.trim().split(',').filter(|item| item.len() > 0);
+        let cubes_shown = reveal.trim().split(',').filter(|item| !item.is_empty());
         for cube_shown in cubes_shown {
             let mut cube_shown_split = cube_shown.trim().split(' ');
             let cube_count = cube_shown_split
@@ -91,7 +91,7 @@ fn min_cube_counts_game_part2(line: &str) -> isize {
         let mut required_red_count = 0;
         let mut required_green_count = 0;
         let mut required_blue_count = 0;
-        let cubes_shown = reveal.trim().split(',').filter(|item| item.len() > 0);
+        let cubes_shown = reveal.trim().split(',').filter(|item| !item.is_empty());
         for cube_shown in cubes_shown {
             let mut cube_shown_split = cube_shown.trim().split(' ');
             let cube_count = cube_shown_split

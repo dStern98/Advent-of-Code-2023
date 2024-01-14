@@ -74,7 +74,7 @@ impl PokerHand {
         }
         let mut optional_hands = Vec::new();
         for card in AVAILABLE_CARDS {
-            let new_hand_with_wildcard = self.hand.replacen("J", &card.to_string(), 1);
+            let new_hand_with_wildcard = self.hand.replacen('J', &card.to_string(), 1);
             let new_poker_hand = PokerHand::new(&new_hand_with_wildcard, self.wager, true);
             //Recursively compute the next wildcard replacement optimization.
             let optional_hand = new_poker_hand.compute_wildcard_handtype();
@@ -128,33 +128,41 @@ fn map_card_to_num(card: char, use_wildcards: bool) -> usize {
 
 impl PartialOrd for PokerHand {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.hand_type == other.hand_type && self.hand == other.hand {
-            return Some(Ordering::Equal);
-        }
-        //Because ranks start at 0 and count up, a higher hand_type in our designation is bad.
-        if self.hand_type > other.hand_type {
-            return Some(Ordering::Less);
-        } else if self.hand_type < other.hand_type {
-            return Some(Ordering::Greater);
-        }
-        //If the two hands are of the same rank, then compare each char one-by-one to determine which hand is better.
-        for (char1, char2) in self.hand.chars().zip(other.hand.chars()) {
-            let char1_as_num = map_card_to_num(char1, self.use_wildcard);
-            let char2_as_num = map_card_to_num(char2, other.use_wildcard);
-            if char1_as_num > char2_as_num {
-                return Some(Ordering::Greater);
-            } else if char2_as_num > char1_as_num {
-                return Some(Ordering::Less);
-            }
-        }
-        Some(Ordering::Equal)
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for PokerHand {
     fn cmp(&self, other: &Self) -> Ordering {
         //! Partial ORD implementation is already good enough
-        self.partial_cmp(other).unwrap()
+        if self.hand_type == other.hand_type && self.hand == other.hand {
+            return Ordering::Equal;
+        }
+        //Because ranks start at 0 and count up, a higher hand_type in our designation is bad.
+        match self.hand_type.cmp(&other.hand_type) {
+            Ordering::Greater => {
+                return Ordering::Less;
+            }
+            Ordering::Less => {
+                return Ordering::Greater;
+            }
+            Ordering::Equal => {}
+        }
+        //If the two hands are of the same rank, then compare each char one-by-one to determine which hand is better.
+        for (char1, char2) in self.hand.chars().zip(other.hand.chars()) {
+            let char1_as_num = map_card_to_num(char1, self.use_wildcard);
+            let char2_as_num = map_card_to_num(char2, other.use_wildcard);
+            match char1_as_num.cmp(&char2_as_num) {
+                Ordering::Greater => {
+                    return Ordering::Greater;
+                }
+                Ordering::Less => {
+                    return Ordering::Less;
+                }
+                Ordering::Equal => {}
+            }
+        }
+        Ordering::Equal
     }
 }
 
@@ -165,10 +173,7 @@ fn char_count(hand: &str) -> Vec<usize> {
     for char in hand.chars() {
         *char_counter.entry(char).or_default() += 1;
     }
-    char_counter
-        .values()
-        .map(|item| item.clone())
-        .collect::<Vec<_>>()
+    char_counter.values().copied().collect::<Vec<_>>()
 }
 
 impl PokerHand {

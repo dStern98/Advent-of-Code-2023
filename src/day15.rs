@@ -77,7 +77,7 @@ fn handle_equals_op(step: &str, lens_map: &mut HashMap<usize, Vec<(String, usize
 fn handle_dash_op(step: &str, lens_map: &mut HashMap<usize, Vec<(String, usize)>>) {
     //! Perform the changes to the lens_map as described for a dash operation.
     let step = step.trim();
-    let label = step.replace("-", "");
+    let label = step.replace('-', "");
     let specified_box = lens_map.get_mut(&hash(&label)).unwrap();
 
     let mut index = 0;

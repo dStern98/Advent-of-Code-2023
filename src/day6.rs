@@ -44,7 +44,7 @@ fn process_input_file(file_as_str: String) -> Vec<(usize, usize)> {
         .trim()
         .split(' ')
         .filter_map(|item| {
-            if item.len() > 0 {
+            if !item.is_empty() {
                 return Some(item.trim().parse::<usize>().unwrap());
             }
             None
@@ -55,18 +55,14 @@ fn process_input_file(file_as_str: String) -> Vec<(usize, usize)> {
         .trim()
         .split(' ')
         .filter_map(|item| {
-            if item.len() > 0 {
+            if !item.is_empty() {
                 return Some(item.trim().parse::<usize>().unwrap());
             }
             None
         })
         .collect::<Vec<_>>();
 
-    times
-        .into_iter()
-        .zip(distances.into_iter())
-        .map(|(time, distance)| (time, distance))
-        .collect::<Vec<_>>()
+    times.into_iter().zip(distances).collect::<Vec<_>>()
 }
 
 fn process_input_file_part2(file_as_str: String) -> (usize, usize) {
@@ -77,13 +73,13 @@ fn process_input_file_part2(file_as_str: String) -> (usize, usize) {
     let time = times
         .replace("Time:", "")
         .trim()
-        .replace(" ", "")
+        .replace(' ', "")
         .parse::<usize>()
         .unwrap();
     let distance = distances
         .replace("Distance:", "")
         .trim()
-        .replace(" ", "")
+        .replace(' ', "")
         .parse::<usize>()
         .unwrap();
     (time, distance)

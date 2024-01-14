@@ -12,11 +12,11 @@ impl SolveAdvent for Day19 {
             let mut current_workflow = workflows.get("in").unwrap();
             loop {
                 let next_workflow = find_next_workflow(&part, current_workflow);
-                if next_workflow == "A".to_owned() {
-                    let part_score_total: usize = part.values().map(|item| item.clone()).sum();
+                if next_workflow == "A" {
+                    let part_score_total: usize = part.values().cloned().sum();
                     total_ratings_number += part_score_total;
                     break;
-                } else if next_workflow == "R".to_owned() {
+                } else if next_workflow == "R" {
                     break;
                 } else {
                     current_workflow = workflows.get(&next_workflow).unwrap();
@@ -41,7 +41,7 @@ impl SolveAdvent for Day19 {
         let total_acceptable_paths: usize = parsed_workflows
             .into_iter()
             .filter(|workflow| workflow.iter().last().unwrap() == &"A".to_owned())
-            .map(|acceptable_path| count_valid_rating_combinations(acceptable_path))
+            .map(count_valid_rating_combinations)
             .sum();
 
         println!(
@@ -51,7 +51,7 @@ impl SolveAdvent for Day19 {
     }
 }
 
-fn find_next_workflow(rating: &HashMap<String, usize>, workflow_rules: &Vec<String>) -> String {
+fn find_next_workflow(rating: &HashMap<String, usize>, workflow_rules: &[String]) -> String {
     //! Given a rating and a workflow's rules, return the destination (either A for accepted, R for Rejected, or
     //! the key to another workflow).
     for rule in workflow_rules.iter() {
@@ -71,49 +71,47 @@ fn find_next_workflow(rating: &HashMap<String, usize>, workflow_rules: &Vec<Stri
         let number_to_test = rule_actual_split.next().unwrap().parse::<usize>().unwrap();
         let rated_value = rating.get(key_to_test).unwrap();
         //If the rated_value matches a logical rule, return that destination.
-        if rule_symbol == ">" && rated_value > &number_to_test {
-            return destination.to_owned();
-        } else if rule_symbol == "<" && rated_value < &number_to_test {
+        if (rule_symbol == ">" && rated_value > &number_to_test)
+            || (rule_symbol == "<" && rated_value < &number_to_test)
+        {
             return destination.to_owned();
         }
     }
     panic!("Last rule contained a colon");
 }
 
-fn process_into_workflows_ratings(
-    file_as_str: String,
-) -> (Vec<HashMap<String, usize>>, HashMap<String, Vec<String>>) {
+type Ratings = Vec<HashMap<String, usize>>;
+type WorkflowMap = HashMap<String, Vec<String>>;
+
+fn process_into_workflows_ratings(file_as_str: String) -> (Ratings, WorkflowMap) {
     //! Given the input file as a String, process the ratings and workflows.
     let mut ratings = Vec::new();
     let mut workflows = Vec::new();
 
     for line in file_as_str.lines() {
         //We know that all ratings start with a {
-        if line.starts_with("{") {
+        if line.starts_with('{') {
             ratings.push(line)
         //Ignore any empty lines.
-        } else if line.len() > 0 {
+        } else if !line.is_empty() {
             workflows.push(line);
         }
     }
-    let ratings =
-        ratings
-            .into_iter()
-            .map(|item| {
-                HashMap::from_iter(item.replace("{", "").replace("}", "").split(',').map(
-                    |rating| {
-                        let mut rating = rating.split('=');
-                        let key = rating.next().unwrap().to_owned();
-                        let value = rating.next().unwrap().parse::<usize>().unwrap();
-                        (key, value)
-                    },
-                ))
-            })
-            .collect::<Vec<_>>();
+    let ratings = ratings
+        .into_iter()
+        .map(|item| {
+            HashMap::from_iter(item.replace(['{', '}'], "").split(',').map(|rating| {
+                let mut rating = rating.split('=');
+                let key = rating.next().unwrap().to_owned();
+                let value = rating.next().unwrap().parse::<usize>().unwrap();
+                (key, value)
+            }))
+        })
+        .collect::<Vec<_>>();
 
     let mut workflow_map = HashMap::with_capacity(workflows.len());
     for workflow in workflows {
-        let workflow = workflow.replace("}", "");
+        let workflow = workflow.replace('}', "");
         let mut workflow_split = workflow.split('{');
         let workflow_name = workflow_split.next().unwrap().to_owned();
         let workflow_rules = workflow_split
@@ -136,16 +134,16 @@ fn traverse_workflows_recursively(
     //! in a vector, so that at the return of the first function invocation, all possible logical branch
     //! have been completely populated.
     if current_map_state == &"A".to_owned() {
-        return vec![vec!["A".to_owned()]];
+        vec![vec!["A".to_owned()]]
     } else if current_map_state == &"R".to_owned() {
-        return vec![vec!["R".to_owned()]];
+        vec![vec!["R".to_owned()]]
     } else {
         //If none of the base cases is triggered, then recursively take each logical branch down the tree.
         let this_workflows_directions = workflows.get(current_map_state).unwrap();
         let mut outer_vec = Vec::new();
         //Get the Inverses of each of the rules in this workflow.
         let rule_inverses = generate_inverse_of_rules(this_workflows_directions);
-        for (index, direction) in this_workflows_directions.into_iter().enumerate() {
+        for (index, direction) in this_workflows_directions.iter().enumerate() {
             if direction.contains(':') {
                 //An example direction is s>2770:qs
                 let this_directions_inverses = rule_inverses
@@ -185,7 +183,7 @@ fn traverse_workflows_recursively(
     }
 }
 
-fn generate_inverse_of_rules(rules: &Vec<String>) -> Vec<String> {
+fn generate_inverse_of_rules(rules: &[String]) -> Vec<String> {
     //! Given the rules of certain workflow, product the inverse rules (
     //! the opposite of each rule).
     rules
@@ -218,9 +216,9 @@ fn count_valid_rating_combinations(mut acceptable_branch: Vec<String>) -> usize 
     //Iterate over the rules in the acceptable branch
     for rule in acceptable_branch {
         //Parse the rule into a logical operation, a number, and a key.
-        let negate_truth_test = if rule.contains('!') { true } else { false };
+        let negate_truth_test = rule.contains('!');
         let comparison_operation = if rule.contains('>') { ">" } else { "<" };
-        let rule = rule.replace("!", "");
+        let rule = rule.replace('!', "");
         let mut rule_iterator = rule.split(comparison_operation);
         let rule_key = rule_iterator.next().unwrap().to_owned();
         let rule_value = rule_iterator.next().unwrap().parse::<u64>().unwrap();
@@ -230,11 +228,11 @@ fn count_valid_rating_combinations(mut acceptable_branch: Vec<String>) -> usize 
         while index < rating_combinations_available.len() {
             let rating = rating_combinations_available.get(index).unwrap();
             let truth_test = if comparison_operation == ">" && negate_truth_test {
-                !(rating <= &rule_value)
+                rating > &rule_value
             } else if comparison_operation == ">" && !negate_truth_test {
                 rating <= &rule_value
             } else if comparison_operation == "<" && negate_truth_test {
-                !(rating >= &rule_value)
+                rating < &rule_value
             } else {
                 rating >= &rule_value
             };

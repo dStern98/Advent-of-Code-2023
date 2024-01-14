@@ -39,14 +39,14 @@ impl SolveAdvent for Day4 {
                 }
             }
             //Get how many cards of this number we have won (including duplicates won)
-            let card_count = card_counter.get(&card_number).unwrap().clone();
+            let card_count = *card_counter.get(&card_number).unwrap();
 
             //For each of the next winning_card_count cards, we win an extra card_count of that card.
             for card_number in card_number + 1..card_number + winning_card_count + 1 {
                 *card_counter.get_mut(&card_number).unwrap() += card_count;
             }
         }
-        let sum_of_cards: i32 = card_counter.values().map(|item| item.clone()).sum();
+        let sum_of_cards: i32 = card_counter.values().copied().sum();
         println!("Total Card Counts including duplicates: {}", sum_of_cards);
     }
 }
@@ -68,7 +68,7 @@ fn process_card(line: &str) -> (usize, Vec<usize>, Vec<usize>) {
         .unwrap()
         .trim()
         .split(' ')
-        .filter(|item| item.len() > 0)
+        .filter(|item| !item.is_empty())
         .map(|number| number.trim().parse::<usize>().unwrap())
         .collect::<Vec<_>>();
     let your_numbers = all_numbers_split
@@ -76,7 +76,7 @@ fn process_card(line: &str) -> (usize, Vec<usize>, Vec<usize>) {
         .unwrap()
         .trim()
         .split(' ')
-        .filter(|item| item.len() > 0)
+        .filter(|item| !item.is_empty())
         .map(|number| number.trim().parse::<usize>().unwrap())
         .collect::<Vec<_>>();
     (card_number, your_numbers, winning_numbers)

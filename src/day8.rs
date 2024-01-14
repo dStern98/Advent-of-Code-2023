@@ -31,7 +31,7 @@ impl SolveAdvent for Day8 {
         //Start at all nodes the end with A
         let starting_nodes = lr_map
             .keys()
-            .filter(|position| position.ends_with("A"))
+            .filter(|position| position.ends_with('A'))
             .collect::<Vec<_>>();
         let mut steps_to_reach_ending_in_z = Vec::new();
 
@@ -40,7 +40,7 @@ impl SolveAdvent for Day8 {
             let mut current_position = starting_node.to_owned();
             let mut steps = 0;
             for step in lr_pattern.chars().cycle() {
-                if current_position.ends_with("Z") {
+                if current_position.ends_with('Z') {
                     break;
                 }
                 steps += 1;
@@ -54,7 +54,7 @@ impl SolveAdvent for Day8 {
             steps_to_reach_ending_in_z.push(steps);
         }
         println!(
-            "Steps for each node to reach ending in Z: {:?}",
+            "Steps for each node to reach ending in Z: {:?}. The LCM of these numbers is the answer.",
             steps_to_reach_ending_in_z
         );
         //The key insight is to realize that the LCM of the vec of steps
@@ -80,8 +80,7 @@ fn process_input_file(file_as_str: String) -> (String, HashMap<String, (String, 
             .next()
             .unwrap()
             .trim()
-            .replace("(", "")
-            .replace(")", "");
+            .replace(['(', ')'], "");
         let mut value_iterator = value.split(',').map(|item| item.trim());
         let value1 = value_iterator.next().unwrap().to_owned();
         let value2 = value_iterator.next().unwrap().to_owned();

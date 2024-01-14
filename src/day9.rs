@@ -9,7 +9,6 @@ impl SolveAdvent for Day9 {
         for line in file_as_str.lines() {
             let line_split = line
                 .split(' ')
-                .into_iter()
                 .map(|item| item.trim().parse::<i32>().unwrap())
                 .collect::<Vec<_>>();
             adder_total += extrapolate_history_part1(line_split);
@@ -23,7 +22,6 @@ impl SolveAdvent for Day9 {
         for line in file_as_str.lines() {
             let line_split = line
                 .split(' ')
-                .into_iter()
                 .map(|item| item.trim().parse::<i32>().unwrap())
                 .collect::<Vec<_>>();
             adder_total += extrapolate_history_part2(line_split);
@@ -40,7 +38,7 @@ fn build_history_pyramid(history: Vec<i32>) -> Vec<Vec<i32>> {
         .iter()
         .all(|item| item == &0)
     {
-        let last_history = history_pyramid.get(history_pyramid.len() - 1).unwrap();
+        let last_history = history_pyramid.last().unwrap();
         //Build a new vector out of the delta of each item in the pyramid row above.
         let mut new_pyramid = Vec::new();
         for i in 0..last_history.len() - 1 {
@@ -59,10 +57,9 @@ fn extrapolate_history_part1(history: Vec<i32>) -> i32 {
     let mut adder = 0;
     //Remove the bottom row, because we know its all zeros anyway.
     history_pyramid.pop().unwrap();
-    while !history_pyramid.is_empty() {
-        let last_history = history_pyramid.pop().unwrap();
+    while let Some(last_history) = history_pyramid.pop() {
         //Set the new adder to the last value in the bottom row of the pyramid plus the old adder
-        adder = last_history.iter().last().unwrap() + adder;
+        adder += last_history.iter().last().unwrap();
     }
     //When the loop completes, the adder value is now the extrapolated history.
     adder
@@ -75,9 +72,8 @@ fn extrapolate_history_part2(history: Vec<i32>) -> i32 {
 
     let mut subtractor = 0;
     history_pyramid.pop().unwrap();
-    while !history_pyramid.is_empty() {
-        let last_history = history_pyramid.pop().unwrap();
-        subtractor = last_history.iter().next().unwrap() - subtractor;
+    while let Some(last_history) = history_pyramid.pop() {
+        subtractor = last_history.first().unwrap() - subtractor;
     }
     subtractor
 }

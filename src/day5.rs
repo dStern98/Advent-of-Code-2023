@@ -6,7 +6,6 @@ pub struct Day5;
 impl SolveAdvent for Day5 {
     fn solve_part1(path_to_file: &str) {
         let (seeds, maps_hashmap) = process_into_maps(path_to_file);
-        println!("Seed Inputs: {:?}", seeds);
         let processed_maps = process_maps_into_numbers(maps_hashmap);
         let mut min_seen = usize::MAX;
         for seed_input in seeds {
@@ -33,11 +32,11 @@ fn process_into_maps(fp: &str) -> (Vec<usize>, HashMap<String, String>) {
     let mut almanac_maps = HashMap::new();
     //For easier parsing, replace the empty lines with '|'.
     for line in input_str.lines() {
-        if line.len() > 0 {
+        if !line.is_empty() {
             final_string.push_str(line);
-            final_string.push_str("\n");
+            final_string.push('\n');
         } else {
-            final_string.push_str("|");
+            final_string.push('|');
         }
     }
     for partition in final_string.split('|') {
@@ -107,6 +106,5 @@ fn apply_chain(seed_input: usize, maps: &HashMap<String, Vec<(usize, usize, usiz
     let temperature_value = get_single_map_value("light-to-temperature map", light_value, maps);
     let humidity_value =
         get_single_map_value("temperature-to-humidity map", temperature_value, maps);
-    let location_value = get_single_map_value("humidity-to-location map", humidity_value, maps);
-    location_value
+    get_single_map_value("humidity-to-location map", humidity_value, maps)
 }
