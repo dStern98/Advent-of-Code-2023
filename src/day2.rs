@@ -25,7 +25,7 @@ impl SolveAdvent for Day2 {
 fn possible_game_part1(line: &str) -> isize {
     //! Returns the game_id of the game if it was possible,
     //! otherwise returns 0 (which does not affect the sum).
-    let mut line_split_by_colon = line.split(":");
+    let mut line_split_by_colon = line.split(':');
     let game_number = line_split_by_colon
         .next()
         .unwrap()
@@ -33,16 +33,16 @@ fn possible_game_part1(line: &str) -> isize {
         .replace("Game ", "")
         .parse::<isize>()
         .unwrap();
-    let reveals = line_split_by_colon.next().unwrap().split(";");
+    let reveals = line_split_by_colon.next().unwrap().split(';');
 
     for reveal in reveals {
         let reveal = reveal.trim();
         let mut red_count = 12;
         let mut green_count = 13;
         let mut blue_count = 14;
-        let cubes_shown = reveal.trim().split(",").filter(|item| item.len() > 0);
+        let cubes_shown = reveal.trim().split(',').filter(|item| item.len() > 0);
         for cube_shown in cubes_shown {
-            let mut cube_shown_split = cube_shown.trim().split(" ");
+            let mut cube_shown_split = cube_shown.trim().split(' ');
             let cube_count = cube_shown_split
                 .next()
                 .unwrap()
@@ -73,7 +73,7 @@ fn possible_game_part1(line: &str) -> isize {
 fn min_cube_counts_game_part2(line: &str) -> isize {
     //! Returns the game_id of the game if it was possible,
     //! otherwise returns 0 (which does not affect the sum).
-    let mut line_split_by_colon = line.split(":");
+    let mut line_split_by_colon = line.split(':');
     let _game_number = line_split_by_colon
         .next()
         .unwrap()
@@ -81,7 +81,7 @@ fn min_cube_counts_game_part2(line: &str) -> isize {
         .replace("Game ", "")
         .parse::<isize>()
         .unwrap();
-    let reveals = line_split_by_colon.next().unwrap().split(";");
+    let reveals = line_split_by_colon.next().unwrap().split(';');
     let mut max_red_count_required = 0;
     let mut max_green_count_required = 0;
     let mut max_blue_count_required = 0;
@@ -91,9 +91,9 @@ fn min_cube_counts_game_part2(line: &str) -> isize {
         let mut required_red_count = 0;
         let mut required_green_count = 0;
         let mut required_blue_count = 0;
-        let cubes_shown = reveal.trim().split(",").filter(|item| item.len() > 0);
+        let cubes_shown = reveal.trim().split(',').filter(|item| item.len() > 0);
         for cube_shown in cubes_shown {
-            let mut cube_shown_split = cube_shown.trim().split(" ");
+            let mut cube_shown_split = cube_shown.trim().split(' ');
             let cube_count = cube_shown_split
                 .next()
                 .unwrap()

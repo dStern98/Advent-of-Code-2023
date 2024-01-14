@@ -42,7 +42,7 @@ fn process_input_file(file_as_str: String) -> Vec<(usize, usize)> {
     let times = times
         .replace("Time:", "")
         .trim()
-        .split(" ")
+        .split(' ')
         .filter_map(|item| {
             if item.len() > 0 {
                 return Some(item.trim().parse::<usize>().unwrap());
@@ -53,7 +53,7 @@ fn process_input_file(file_as_str: String) -> Vec<(usize, usize)> {
     let distances = distances
         .replace("Distance:", "")
         .trim()
-        .split(" ")
+        .split(' ')
         .filter_map(|item| {
             if item.len() > 0 {
                 return Some(item.trim().parse::<usize>().unwrap());

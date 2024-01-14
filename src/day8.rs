@@ -74,7 +74,7 @@ fn process_input_file(file_as_str: String) -> (String, HashMap<String, (String, 
     //Process the rest into a HashMap
     let mut left_right_map = HashMap::new();
     for line in line_iterator {
-        let mut equals_splitter = line.split("=");
+        let mut equals_splitter = line.split('=');
         let key = equals_splitter.next().unwrap().trim().to_owned();
         let value = equals_splitter
             .next()
@@ -82,7 +82,7 @@ fn process_input_file(file_as_str: String) -> (String, HashMap<String, (String, 
             .trim()
             .replace("(", "")
             .replace(")", "");
-        let mut value_iterator = value.split(",").map(|item| item.trim());
+        let mut value_iterator = value.split(',').map(|item| item.trim());
         let value1 = value_iterator.next().unwrap().to_owned();
         let value2 = value_iterator.next().unwrap().to_owned();
         left_right_map.insert(key, (value1, value2));

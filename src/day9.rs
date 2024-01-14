@@ -8,7 +8,7 @@ impl SolveAdvent for Day9 {
         let mut adder_total = 0;
         for line in file_as_str.lines() {
             let line_split = line
-                .split(" ")
+                .split(' ')
                 .into_iter()
                 .map(|item| item.trim().parse::<i32>().unwrap())
                 .collect::<Vec<_>>();
@@ -22,7 +22,7 @@ impl SolveAdvent for Day9 {
         let mut adder_total = 0;
         for line in file_as_str.lines() {
             let line_split = line
-                .split(" ")
+                .split(' ')
                 .into_iter()
                 .map(|item| item.trim().parse::<i32>().unwrap())
                 .collect::<Vec<_>>();

@@ -6,7 +6,7 @@ pub struct Day15;
 impl SolveAdvent for Day15 {
     fn solve_part1(path_to_file: &str) {
         let file_as_str = read_file_to_string(path_to_file);
-        let init_sequence = file_as_str.split(",");
+        let init_sequence = file_as_str.split(',');
         let mut total_hash_value = 0;
         for sequence in init_sequence {
             total_hash_value += hash(sequence);
@@ -16,7 +16,7 @@ impl SolveAdvent for Day15 {
 
     fn solve_part2(path_to_file: &str) {
         let file_as_str = read_file_to_string(path_to_file);
-        let init_sequence = file_as_str.split(",");
+        let init_sequence = file_as_str.split(',');
 
         //Intialize the lens_map to contain all empty boxes from 0..255
         let mut lens_map = HashMap::with_capacity(256);
@@ -25,9 +25,9 @@ impl SolveAdvent for Day15 {
         }
 
         for step in init_sequence {
-            if step.contains("=") {
+            if step.contains('=') {
                 handle_equals_op(step, &mut lens_map);
-            } else if step.contains("-") {
+            } else if step.contains('-') {
                 handle_dash_op(step, &mut lens_map);
             }
         }
@@ -49,7 +49,7 @@ fn hash(input: &str) -> usize {
     for ascii_bytes in input_as_bytes {
         hash_value += *ascii_bytes as usize;
         hash_value *= 17;
-        hash_value = hash_value % 256;
+        hash_value %= 256;
     }
     hash_value
 }
@@ -57,7 +57,7 @@ fn hash(input: &str) -> usize {
 fn handle_equals_op(step: &str, lens_map: &mut HashMap<usize, Vec<(String, usize)>>) {
     //! Perform the changes to the lens_map as described for the equals operations.
     let step = step.trim();
-    let mut step_splitter = step.split("=");
+    let mut step_splitter = step.split('=');
     let label_to_insert = step_splitter.next().unwrap();
     let focal_length_to_insert = step_splitter.next().unwrap().parse::<usize>().unwrap();
     let specified_box = lens_map.get_mut(&hash(label_to_insert)).unwrap();

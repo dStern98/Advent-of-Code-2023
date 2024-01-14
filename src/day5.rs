@@ -40,8 +40,8 @@ fn process_into_maps(fp: &str) -> (Vec<usize>, HashMap<String, String>) {
             final_string.push_str("|");
         }
     }
-    for partition in final_string.split("|") {
-        let mut partition_splitter = partition.split(":");
+    for partition in final_string.split('|') {
+        let mut partition_splitter = partition.split(':');
         let name = partition_splitter.next().unwrap().trim();
         let map = partition_splitter.next().unwrap().trim();
         almanac_maps.insert(name.to_owned(), map.to_owned());
@@ -49,7 +49,7 @@ fn process_into_maps(fp: &str) -> (Vec<usize>, HashMap<String, String>) {
 
     let seeds = almanac_maps.remove("seeds").unwrap();
     let seeds = seeds
-        .split(" ")
+        .split(' ')
         .map(|item| item.parse::<usize>().unwrap())
         .collect::<Vec<usize>>();
     (seeds, almanac_maps)
@@ -65,7 +65,7 @@ fn process_maps_into_numbers(
         let mut range_vec = Vec::new();
         for line in map.lines() {
             let mut line_iterator = line
-                .split(" ")
+                .split(' ')
                 .map(|item| item.trim().parse::<usize>().unwrap());
             let dest_range_start = line_iterator.next().unwrap();
             let src_range_start = line_iterator.next().unwrap();

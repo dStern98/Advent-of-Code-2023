@@ -54,7 +54,7 @@ impl SolveAdvent for Day4 {
 fn process_card(line: &str) -> (usize, Vec<usize>, Vec<usize>) {
     //! Given a line representing a single card, process the card into 3 parts,
     //! the card number, the winning numbers, and the numbers you have.
-    let mut line_split = line.split(":");
+    let mut line_split = line.split(':');
     let card_number = line_split
         .next()
         .unwrap()
@@ -62,12 +62,12 @@ fn process_card(line: &str) -> (usize, Vec<usize>, Vec<usize>) {
         .trim()
         .parse::<usize>()
         .unwrap();
-    let mut all_numbers_split = line_split.next().unwrap().split("|");
+    let mut all_numbers_split = line_split.next().unwrap().split('|');
     let winning_numbers = all_numbers_split
         .next()
         .unwrap()
         .trim()
-        .split(" ")
+        .split(' ')
         .filter(|item| item.len() > 0)
         .map(|number| number.trim().parse::<usize>().unwrap())
         .collect::<Vec<_>>();
@@ -75,7 +75,7 @@ fn process_card(line: &str) -> (usize, Vec<usize>, Vec<usize>) {
         .next()
         .unwrap()
         .trim()
-        .split(" ")
+        .split(' ')
         .filter(|item| item.len() > 0)
         .map(|number| number.trim().parse::<usize>().unwrap())
         .collect::<Vec<_>>();

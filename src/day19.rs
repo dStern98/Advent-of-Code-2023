@@ -55,15 +55,15 @@ fn find_next_workflow(rating: &HashMap<String, usize>, workflow_rules: &Vec<Stri
     //! Given a rating and a workflow's rules, return the destination (either A for accepted, R for Rejected, or
     //! the key to another workflow).
     for rule in workflow_rules.iter() {
-        if !rule.contains(":") {
+        if !rule.contains(':') {
             //If no colon is present, then the rule is itself a destination,
             //so simply return it.
             return rule.to_owned();
         }
-        let mut rule_split = rule.split(":");
+        let mut rule_split = rule.split(':');
         let rule_actual = rule_split.next().unwrap();
         let destination = rule_split.next().unwrap();
-        let rule_symbol = if rule_actual.contains(">") { ">" } else { "<" };
+        let rule_symbol = if rule_actual.contains('>') { ">" } else { "<" };
         let mut rule_actual_split = rule_actual.split(rule_symbol);
         //Obtain the rule_key, rule_value to test against
         //(for example x<256 means x is the key_to_test and 256 is the number_to_test)
@@ -100,9 +100,9 @@ fn process_into_workflows_ratings(
         ratings
             .into_iter()
             .map(|item| {
-                HashMap::from_iter(item.replace("{", "").replace("}", "").split(",").map(
+                HashMap::from_iter(item.replace("{", "").replace("}", "").split(',').map(
                     |rating| {
-                        let mut rating = rating.split("=");
+                        let mut rating = rating.split('=');
                         let key = rating.next().unwrap().to_owned();
                         let value = rating.next().unwrap().parse::<usize>().unwrap();
                         (key, value)
@@ -114,12 +114,12 @@ fn process_into_workflows_ratings(
     let mut workflow_map = HashMap::with_capacity(workflows.len());
     for workflow in workflows {
         let workflow = workflow.replace("}", "");
-        let mut workflow_split = workflow.split("{");
+        let mut workflow_split = workflow.split('{');
         let workflow_name = workflow_split.next().unwrap().to_owned();
         let workflow_rules = workflow_split
             .next()
             .unwrap()
-            .split(",")
+            .split(',')
             .map(|item| item.to_owned())
             .collect::<Vec<_>>();
         workflow_map.insert(workflow_name, workflow_rules);
@@ -146,14 +146,14 @@ fn traverse_workflows_recursively(
         //Get the Inverses of each of the rules in this workflow.
         let rule_inverses = generate_inverse_of_rules(this_workflows_directions);
         for (index, direction) in this_workflows_directions.into_iter().enumerate() {
-            if direction.contains(":") {
+            if direction.contains(':') {
                 //An example direction is s>2770:qs
                 let this_directions_inverses = rule_inverses
                     .clone()
                     .drain(0..index)
                     .rev()
                     .collect::<Vec<_>>();
-                let mut current_workflow_direction_split = direction.split(":");
+                let mut current_workflow_direction_split = direction.split(':');
                 //In this example workflow rule is s>2770
                 let workflow_rule = current_workflow_direction_split.next().unwrap();
                 //In this example, go_to_node is qs
@@ -191,8 +191,8 @@ fn generate_inverse_of_rules(rules: &Vec<String>) -> Vec<String> {
     rules
         .iter()
         .filter_map(|rule| {
-            if rule.contains(":") {
-                let mut rule_split = rule.split(":");
+            if rule.contains(':') {
+                let mut rule_split = rule.split(':');
                 let rule_component = rule_split.next().unwrap();
                 return Some(format!("!{}", rule_component));
             }
@@ -218,8 +218,8 @@ fn count_valid_rating_combinations(mut acceptable_branch: Vec<String>) -> usize 
     //Iterate over the rules in the acceptable branch
     for rule in acceptable_branch {
         //Parse the rule into a logical operation, a number, and a key.
-        let negate_truth_test = if rule.contains("!") { true } else { false };
-        let comparison_operation = if rule.contains(">") { ">" } else { "<" };
+        let negate_truth_test = if rule.contains('!') { true } else { false };
+        let comparison_operation = if rule.contains('>') { ">" } else { "<" };
         let rule = rule.replace("!", "");
         let mut rule_iterator = rule.split(comparison_operation);
         let rule_key = rule_iterator.next().unwrap().to_owned();
