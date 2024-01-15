@@ -19,11 +19,11 @@ class SolveAdvent(ABC):
         """
         Solve Part1 of the Days Advent Problem
         """
-        pass
+        ...
 
     @abstractmethod
     def solve_part2(self):
         """
         Solve Part2 of the Days Advent Problem.
         """
-        pass
+        ...
