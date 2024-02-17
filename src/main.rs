@@ -3,6 +3,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 
 mod day1;
+mod day11;
 mod day15;
 mod day19;
 mod day2;
@@ -34,6 +35,6 @@ trait SolveAdvent {
 }
 
 fn main() {
-    day19::Day19::solve_part1("input.txt");
-    day19::Day19::solve_part2("input.txt");
+    day11::Day11::solve_part1("input.txt");
+    day11::Day11::solve_part2("test.txt");
 }
