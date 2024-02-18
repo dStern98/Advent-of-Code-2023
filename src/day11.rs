@@ -42,10 +42,6 @@ impl Galaxy {
                 }
             }
         }
-        println!(
-            "------------There are {} total galaxies in this universe-------------",
-            identified_galaxies.len()
-        );
         identified_galaxies
     }
 }
@@ -99,6 +95,12 @@ impl Universe {
         }
         //Locate all galaxies in the universe.
         let galaxies = Galaxy::identify_galaxies(&galaxies_disassembled);
+
+        println!(
+            "------------There are {} total galaxies in this universe with scale factor: {}-------------",
+            galaxies.len(), 
+            scale_factor
+        );
 
         Universe {
             expanded_columns,
@@ -295,7 +297,9 @@ fn find_minimum_distance(galaxy_1: &Galaxy, galaxy_2: &Galaxy, universe: &Univer
     //! the minimum distance.
     //!
     //! To optimize the performance, of the 4 possible probe movement directions, only the direction
-    //! that moves the probe closest to the target is tested.
+    //! that moves the probe closest to the target is tested. Because of this optimization, we do not need
+    //! a hashset to protect against cycles. The probe traversal will never get stuck in a cycle because each iteration
+    //! it only moves in the optimal direction.
 
     //Use a VecDeque for efficient breadth first search.
     let mut probes_tracker = VecDeque::new();
@@ -310,17 +314,11 @@ fn find_minimum_distance(galaxy_1: &Galaxy, galaxy_2: &Galaxy, universe: &Univer
         universe,
     });
 
-    //Prevent cycles using a HashSet to keep track of anywhere that the probe has already gone.
-    let mut already_traveled = HashSet::new();
     while !probes_tracker.is_empty() {
         let latest_probe = probes_tracker.pop_front().unwrap();
         if latest_probe.target_found() {
             return latest_probe.distance_traveled;
         }
-        if already_traveled.contains(&(latest_probe.row, latest_probe.col)) {
-            continue;
-        }
-        already_traveled.insert((latest_probe.row, latest_probe.col));
 
         let mut next_probes = [
             latest_probe.left_one(),
