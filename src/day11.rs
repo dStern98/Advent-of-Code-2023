@@ -27,7 +27,7 @@ struct Galaxy {
 }
 
 impl Galaxy {
-    fn identify_galaxies(universe_map: &Vec<Vec<char>>) -> Vec<Galaxy> {
+    fn identify_galaxies(universe_map: &[Vec<char>]) -> Vec<Galaxy> {
         //! Process the Universe, taking note of the position of all Galaxies.
         let mut identified_galaxies = Vec::new();
         for (row_number, row) in universe_map.iter().enumerate() {
@@ -120,7 +120,7 @@ impl Universe {
         for (galaxy_1_id, galaxy_2_id) in galaxy_pairs.into_iter() {
             let galaxy_1 = self.galaxies.get(galaxy_1_id).unwrap();
             let galaxy_2 = self.galaxies.get(galaxy_2_id).unwrap();
-            let minimum_distance = find_minimum_distance(galaxy_1, galaxy_2, &self);
+            let minimum_distance = find_minimum_distance(galaxy_1, galaxy_2, self);
             total_minimum_distance += minimum_distance;
         }
         println!(
@@ -327,7 +327,7 @@ fn find_minimum_distance(galaxy_1: &Galaxy, galaxy_2: &Galaxy, universe: &Univer
             latest_probe.down_one(),
         ]
         .into_iter()
-        .filter_map(|next_probe| next_probe)
+        .flatten()
         .collect::<Vec<_>>();
         next_probes.sort_by(|a, b| {
             a.distance_to_target()

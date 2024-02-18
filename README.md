@@ -10,7 +10,7 @@ For a day whose solutions is written in Rust, running `cargo run` will typically
 
 Each days solution must implement the trait:
 
-```
+```Rust
 trait SolveAdvent {
     ///How to solve part1 of the days puzzle.
     fn solve_part1(path_to_file: &str);
@@ -26,7 +26,7 @@ where the two methods each take the file path to the input.
 Similar to the Rust solutions, the Python solutions are in the `./advent_python` folder. Because of the `__main__.py` file,
 the module can be directly invoked using the command `python -m advent_python`. All Python solutions inherit from an abstract base class in the `base.py` file, and must inherit from the following class:
 
-```
+```python
 
 class SolveAdvent(ABC):
     def __init__(self, file_path: str):
