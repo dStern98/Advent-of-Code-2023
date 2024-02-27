@@ -2,3 +2,8 @@
 
 *.pyc
 .vscode
+
+unsolved/
+
+input.txt
+test.txt
