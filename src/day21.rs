@@ -37,10 +37,10 @@ impl<'a> GardenExplorerInfinite<'a> {
         let mut rows_adjusted = self.row % row_count;
         let mut column_adjusted = self.column % column_count;
         if rows_adjusted < 0 {
-            rows_adjusted = rows_adjusted + row_count;
+            rows_adjusted += row_count;
         }
         if column_adjusted < 0 {
-            column_adjusted = column_adjusted + column_count;
+            column_adjusted += column_count;
         }
 
         if let Some(position) = self

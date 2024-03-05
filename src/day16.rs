@@ -136,45 +136,45 @@ impl<'a> LightBeam<'a> {
                 if self.row >= self.map.len() - 1 {
                     return None;
                 }
-                return Some(LightBeam {
+                Some(LightBeam {
                     row: self.row + 1,
                     column: self.column,
                     map: self.map,
                     direction,
-                });
+                })
             }
             Direction::Left => {
                 if self.column == 0 {
                     return None;
                 }
-                return Some(LightBeam {
+                Some(LightBeam {
                     row: self.row,
                     column: self.column - 1,
                     map: self.map,
                     direction,
-                });
+                })
             }
             Direction::Right => {
                 if self.column >= self.map[0].len() - 1 {
                     return None;
                 }
-                return Some(LightBeam {
+                Some(LightBeam {
                     row: self.row,
                     column: self.column + 1,
                     map: self.map,
                     direction,
-                });
+                })
             }
             Direction::Up => {
                 if self.row == 0 {
                     return None;
                 }
-                return Some(LightBeam {
+                Some(LightBeam {
                     row: self.row - 1,
                     column: self.column,
                     map: self.map,
                     direction,
-                });
+                })
             }
         }
     }
@@ -263,7 +263,7 @@ fn find_energized_tiles(starting_beam: LightBeam) -> usize {
 }
 
 fn generate_unique_starting_configurations(
-    input_map: &Vec<Vec<char>>,
+    input_map: &[Vec<char>],
 ) -> [(Direction, Vec<(usize, usize)>); 4] {
     //! Part2 says that the beam can start moving down from the top row, moving up from the bottom,
     //! row, moving right from the far left column, and moving left from the far right column.
@@ -272,30 +272,24 @@ fn generate_unique_starting_configurations(
     [
         (
             Direction::Right,
-            (0..map_rows)
-                .map(|row| (row, 0))
-                .into_iter()
-                .collect::<Vec<_>>(),
+            (0..map_rows).map(|row| (row, 0)).collect::<Vec<_>>(),
         ),
         (
             Direction::Left,
             (0..map_rows)
                 .map(|row| (row, map_columns - 1))
-                .into_iter()
                 .collect::<Vec<_>>(),
         ),
         (
             Direction::Up,
             (0..map_columns)
                 .map(|column| (map_rows - 1, column))
-                .into_iter()
                 .collect::<Vec<_>>(),
         ),
         (
             Direction::Down,
             (0..map_columns)
                 .map(|column| (0, column))
-                .into_iter()
                 .collect::<Vec<_>>(),
         ),
     ]
