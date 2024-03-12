@@ -38,6 +38,6 @@ trait SolveAdvent {
 }
 
 fn main() {
-    day5::Day5::solve_part1("input.txt");
-    day5::Day5::solve_part2("input.txt");
+    day10::Day10::solve_part1("input.txt");
+    day10::Day10::solve_part2("input.txt");
 }

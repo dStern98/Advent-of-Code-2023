@@ -1,6 +1,5 @@
-use std::collections::HashSet;
-
 use crate::{read_file_to_string, SolveAdvent};
+use std::collections::HashSet;
 
 pub struct Day10;
 
@@ -8,7 +7,6 @@ impl SolveAdvent for Day10 {
     fn solve_part1(path_to_file: &str) {
         let file_as_str = read_file_to_string(path_to_file);
         let pipe_map = PipeMap::new(&file_as_str);
-        println!("Location of S: {:?}", pipe_map.start);
         let (pipe_explorer1, pipe_explorer2) = pipe_map.find_two_pipes_connected_to_s();
         let furthest_distance = find_largest_distance_from_s(pipe_explorer1, pipe_explorer2);
         println!(
@@ -18,14 +16,43 @@ impl SolveAdvent for Day10 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let _ = read_file_to_string(path_to_file);
+        let file_as_str = read_file_to_string(path_to_file);
+        let pipe_map = PipeMap::new(&file_as_str);
+        let (pipe_explorer1, pipe_explorer2) = pipe_map.find_two_pipes_connected_to_s();
+        let known_pipe_locations =
+            gather_pipe_locations(pipe_explorer1.clone(), pipe_explorer2.clone());
+
+        //Try all 4 possibilities, as it is not trivial to figure out
+        //which of the two S-connected pipes is clockwise and which is counterclockwise.
+        compute_surrounded_points(
+            pipe_explorer1.clone(),
+            &known_pipe_locations,
+            LoopDirection::Clockwise,
+        );
+        compute_surrounded_points(
+            pipe_explorer2.clone(),
+            &known_pipe_locations,
+            LoopDirection::Clockwise,
+        );
+        compute_surrounded_points(
+            pipe_explorer1,
+            &known_pipe_locations,
+            LoopDirection::Counterclockwise,
+        );
+        compute_surrounded_points(
+            pipe_explorer2,
+            &known_pipe_locations,
+            LoopDirection::Counterclockwise,
+        );
     }
 }
 
+///Stores the Input Map and
+/// the position of S as a row, col
 #[derive(Debug, Clone)]
 struct PipeMap {
     map: Vec<Vec<char>>,
-    start: (usize, usize),
+    s_position: (usize, usize),
 }
 
 impl PipeMap {
@@ -48,10 +75,7 @@ impl PipeMap {
             .collect::<Vec<_>>();
 
         let s_position = PipeMap::find_s_position(&map);
-        PipeMap {
-            map,
-            start: s_position,
-        }
+        PipeMap { map, s_position }
     }
 
     fn get_pipe_value(&self, row: usize, col: usize) -> Option<&char> {
@@ -65,7 +89,7 @@ impl PipeMap {
         None
     }
 
-    fn find_two_pipes_connected_to_s(&self) -> (PipeExplorer<'_>, PipeExplorer<'_>) {
+    fn find_two_pipes_connected_to_s(&self) -> (PipeExplorer, PipeExplorer) {
         //! Start from the position of S, look up, down, left, right.
         //! The prompt gurantees that exactly 2 pipes connected to S form the pipe
         //! loop.
@@ -75,9 +99,11 @@ impl PipeMap {
         let valid_pipes_left = ['L', 'F', '-'];
         let valid_pipes_right = ['7', 'J', '-'];
 
-        if self.start.0 > 0 {
-            let (new_row, new_col) = (self.start.0 - 1, self.start.1);
+        if self.s_position.0 > 0 {
+            let (new_row, new_col) = (self.s_position.0 - 1, self.s_position.1);
             if let Some(pipe_symbol) = self.get_pipe_value(new_row, new_col) {
+                //If S connect above to a valid pipe for above: '|', '7', 'F', then that is one
+                //of the valid pipes connected to S.
                 if valid_pipes_above.contains(pipe_symbol) {
                     valid_starting_positions.push(PipeExplorer {
                         row: new_row,
@@ -89,8 +115,19 @@ impl PipeMap {
                 }
             }
         }
-        if self.start.1 > 0 {
-            let (new_row, new_col) = (self.start.0, self.start.1 - 1);
+        if let Some(pipe_symbol) = self.get_pipe_value(self.s_position.0, self.s_position.1 + 1) {
+            if valid_pipes_right.contains(pipe_symbol) {
+                valid_starting_positions.push(PipeExplorer {
+                    row: self.s_position.0,
+                    col: self.s_position.1 + 1,
+                    steps: 1,
+                    direction: Direction::Right,
+                    pipe_map: self,
+                });
+            }
+        }
+        if self.s_position.1 > 0 {
+            let (new_row, new_col) = (self.s_position.0, self.s_position.1 - 1);
             if let Some(pipe_symbol) = self.get_pipe_value(new_row, new_col) {
                 if valid_pipes_left.contains(pipe_symbol) {
                     valid_starting_positions.push(PipeExplorer {
@@ -103,24 +140,13 @@ impl PipeMap {
                 }
             }
         }
-        if let Some(pipe_symbol) = self.get_pipe_value(self.start.0 + 1, self.start.1) {
+        if let Some(pipe_symbol) = self.get_pipe_value(self.s_position.0 + 1, self.s_position.1) {
             if valid_pipes_below.contains(pipe_symbol) {
                 valid_starting_positions.push(PipeExplorer {
-                    row: self.start.0 + 1,
-                    col: self.start.1,
+                    row: self.s_position.0 + 1,
+                    col: self.s_position.1,
                     steps: 1,
                     direction: Direction::Down,
-                    pipe_map: self,
-                });
-            }
-        }
-        if let Some(pipe_symbol) = self.get_pipe_value(self.start.0, self.start.1 + 1) {
-            if valid_pipes_right.contains(pipe_symbol) {
-                valid_starting_positions.push(PipeExplorer {
-                    row: self.start.0,
-                    col: self.start.1 + 1,
-                    steps: 1,
-                    direction: Direction::Right,
                     pipe_map: self,
                 });
             }
@@ -163,9 +189,11 @@ struct PipeExplorer<'a> {
 
 impl<'a> PipeExplorer<'a> {
     fn collided(&self, other: &PipeExplorer) -> bool {
+        //! Whether two pipe explorers have collided.
         self.row == other.row && self.col == other.col
     }
-    fn get_new_position(&self, new_direction: &Direction) -> (usize, usize) {
+    fn move_in_direction(&self, new_direction: &Direction) -> (usize, usize) {
+        //! Move a step in the direction specified by new direction.
         match new_direction {
             Direction::Down => (self.row + 1, self.col),
             Direction::Up => (self.row - 1, self.col),
@@ -173,10 +201,46 @@ impl<'a> PipeExplorer<'a> {
             Direction::Left => (self.row, self.col - 1),
         }
     }
+    fn get_left_orthogonal(&self) -> Option<(usize, usize)> {
+        //! Given an Explorer traversing the loop, return the point directly
+        //! left orthogonal to the direction of motion of the pipe.
+        //!
+        //! This could be impossible
+        //! if the wrong Explorer has been chosen for the given loop traversal direction. For example,
+        //! if Explorer1 is the true Clockwise explorer but Explorer2 is attempted, then it is possible
+        //! that the left orthoginal goes off the map, in which case None is returned, terminating loop
+        //! iteration.
+        match self.direction {
+            Direction::Down if self.col < self.pipe_map.map[0].len() - 1 => {
+                Some((self.row, self.col + 1))
+            }
+            Direction::Left if self.row < self.pipe_map.map.len() - 1 => {
+                Some((self.row + 1, self.col))
+            }
+            Direction::Right if self.row > 0 => Some((self.row - 1, self.col)),
+            Direction::Up if self.col > 0 => Some((self.row, self.col - 1)),
+            _ => None,
+        }
+    }
+    fn get_right_orthogonal(&self) -> Option<(usize, usize)> {
+        //! Return the right orthogonal point of the current `PipeExplorer`.
+        //! It is possible that this will fail because the right orthogonal point is off the map.
+        match self.direction {
+            Direction::Down if self.col > 0 => Some((self.row, self.col - 1)),
+            Direction::Left if self.row > 0 => Some((self.row - 1, self.col)),
+            Direction::Right if self.row < self.pipe_map.map.len() - 1 => {
+                Some((self.row + 1, self.col))
+            }
+            Direction::Up if self.col < self.pipe_map.map[0].len() - 1 => {
+                Some((self.row, self.col + 1))
+            }
+            _ => None,
+        }
+    }
 
-    fn next_move(&mut self) {
+    fn change_direction(&mut self) {
         //! Following the traversal rules of the Day10 problem,
-        //! move the explorer to the next pipe.
+        //! move, change the direction of motion of the `PipeExplorer`.
         let current_pipe_symbol = self
             .pipe_map
             .get_pipe_value(self.row, self.col)
@@ -201,11 +265,22 @@ impl<'a> PipeExplorer<'a> {
 
             _ => panic!("Illegal movement state!"),
         };
-        let (new_row, new_col) = self.get_new_position(&new_direction);
+        self.direction = new_direction;
+    }
+    fn move_in_new_direction(&mut self) {
+        //! Move 1-step in the current direction of motion of the Explorer.
+        let (new_row, new_col) = self.move_in_direction(&self.direction);
         self.row = new_row;
         self.col = new_col;
-        self.direction = new_direction;
         self.steps += 1;
+    }
+
+    fn move_next(&mut self) {
+        //! Change the direction and move 1-step in that direction in one function.
+        //! The reason the methods are split up is because in part2 of the problem, it is necessary
+        //! for the methods to be called seperately.
+        self.change_direction();
+        self.move_in_new_direction();
     }
 }
 
@@ -213,11 +288,11 @@ fn find_largest_distance_from_s(mut pipe_1: PipeExplorer, mut pipe_2: PipeExplor
     //! Given two pipe explorers, which the caller must gurantee are the two pipes connected to S,
     //! will return the largest possible distance from S traveling the loop.
     loop {
-        pipe_1.next_move();
+        pipe_1.move_next();
         if pipe_1.collided(&pipe_2) {
             break;
         };
-        pipe_2.next_move();
+        pipe_2.move_next();
         if pipe_1.collided(&pipe_2) {
             break;
         }
@@ -225,20 +300,127 @@ fn find_largest_distance_from_s(mut pipe_1: PipeExplorer, mut pipe_2: PipeExplor
     pipe_1.steps.max(pipe_2.steps)
 }
 
-#[allow(dead_code)]
-fn find_all_pipe_locations(
-    s_position: (usize, usize),
-    mut pipe1: PipeExplorer,
-    pipe2: PipeExplorer,
+fn gather_pipe_locations(
+    mut pipe_1: PipeExplorer,
+    mut pipe_2: PipeExplorer,
 ) -> HashSet<(usize, usize)> {
-    //! Returns a set of all pipe locations.
-    let mut pipe_positions = HashSet::new();
-    pipe_positions.insert(s_position);
-    while !pipe1.collided(&pipe2) {
-        pipe_positions.insert((pipe1.row, pipe1.col));
-        pipe1.next_move();
+    //! Gather a HashSet containing the ordered pair positions
+    //! of all pipes in the actual loop attached to S.
+    let mut pipe_locations = HashSet::new();
+    pipe_locations.insert(pipe_1.pipe_map.s_position);
+    loop {
+        pipe_locations.insert((pipe_1.row, pipe_1.col));
+        pipe_locations.insert((pipe_2.row, pipe_2.col));
+        pipe_1.move_next();
+        if pipe_1.collided(&pipe_2) {
+            break;
+        };
+        pipe_2.move_next();
+        if pipe_1.collided(&pipe_2) {
+            break;
+        }
     }
-    pipe_positions.insert((pipe2.row, pipe2.col));
-    println!("{:?}", pipe_positions);
-    pipe_positions
+    pipe_locations.insert((pipe_1.row, pipe_1.col));
+    pipe_locations.insert((pipe_2.row, pipe_2.col));
+    pipe_locations
+}
+
+fn walk_loop_interior(
+    known_pipe_locations: &HashSet<(usize, usize)>,
+    starting_point: (usize, usize),
+    interior_points_visited: &mut HashSet<(usize, usize)>,
+    map_dimensions: (usize, usize),
+) -> Option<()> {
+    //! Given a starting point, traverse all points in every
+    //! direction, stopping traversal when a known pipe is reached, or an
+    //! interior_point already visited.
+    let mut stack = vec![starting_point];
+    while let Some(current_position) = stack.pop() {
+        if interior_points_visited.contains(&current_position)
+            || known_pipe_locations.contains(&current_position)
+        {
+            continue;
+        }
+        interior_points_visited.insert(current_position);
+        //protects against accidentally going off the map.
+        let next_steps_are_ok = current_position.0 < map_dimensions.0
+            && current_position.0 > 0
+            && current_position.1 < map_dimensions.1
+            && current_position.1 > 0;
+        if !next_steps_are_ok {
+            return None;
+        }
+        let next_positions = [
+            (current_position.0 + 1, current_position.1),
+            (current_position.0 - 1, current_position.1),
+            (current_position.0, current_position.1 + 1),
+            (current_position.0, current_position.1 - 1),
+        ];
+        stack.extend(next_positions);
+    }
+    Some(())
+}
+
+///The loop can be traversed Clockwise or Counterclockwise.
+#[derive(Debug, Clone)]
+enum LoopDirection {
+    Clockwise,
+    Counterclockwise,
+}
+
+fn compute_surrounded_points(
+    mut explorer_guess: PipeExplorer,
+    pipe_locations: &HashSet<(usize, usize)>,
+    mode: LoopDirection,
+) -> Option<()> {
+    //! Solves Part2 of the Day10 challenge. The key insight here is that
+    //! points that are 'actually in the loop' will always be reachable from the right side
+    //! of the loop if traveling clockwise, and from the left side if traveling counterclockwise.
+    //!
+    //! To solve the problem, traverse the loop either clockwise or counterclockwise.
+    //! For each loop point reached, traverse the points to the right or left orthogonal if possible
+    //! (stop if another pipe is reached, or if another traversal has already reached the point).
+    //! Because it is not trivial to determine which pipe connected to S is the clockwise and counterclockwise pipes,
+    //! all 4 possibilities are tried. This means that 2 invocations of this function will return None, and 2 will produce values.
+    //! The values for clockwise and counterclockwise traversal should be identical, they are both computed simply for validation.
+    let map_dimensions = (
+        explorer_guess.pipe_map.map.len(),
+        explorer_guess.pipe_map.map[0].len(),
+    );
+    let (s_position_row, s_position_col) = explorer_guess.pipe_map.s_position;
+    let mut found_surrounded_tiles = HashSet::new();
+    while !(explorer_guess.row == s_position_row && explorer_guess.col == s_position_col) {
+        //The Interior must be walked twice for each explorer position, once
+        //before and once after changing the direction of the explorer. Otherwise, a small number
+        //of edge cases are missed in the count.
+        let orthogonal_point = match mode {
+            LoopDirection::Clockwise => explorer_guess.get_right_orthogonal()?,
+            LoopDirection::Counterclockwise => explorer_guess.get_left_orthogonal()?,
+        };
+        walk_loop_interior(
+            pipe_locations,
+            orthogonal_point,
+            &mut found_surrounded_tiles,
+            map_dimensions,
+        )?;
+        //Change the explorers direction and compute the surrounded tiles a second time.
+        explorer_guess.change_direction();
+        let orthogonal_point = match mode {
+            LoopDirection::Clockwise => explorer_guess.get_right_orthogonal()?,
+            LoopDirection::Counterclockwise => explorer_guess.get_left_orthogonal()?,
+        };
+        walk_loop_interior(
+            pipe_locations,
+            orthogonal_point,
+            &mut found_surrounded_tiles,
+            map_dimensions,
+        )?;
+        explorer_guess.move_in_new_direction();
+    }
+    println!(
+        "Surrounded tile count is {} when traveling the loop {:?}",
+        found_surrounded_tiles.len(),
+        mode
+    );
+    Some(())
 }
