@@ -6,21 +6,28 @@ pub struct Day24;
 struct Hailstone {
     x: f64,
     y: f64,
-    z: f64,
+    _z: f64,
     vx: f64,
     vy: f64,
-    vz: f64,
+    _vz: f64,
 }
 
 impl Hailstone {
+    #[allow(dead_code)]
+    fn move_t(&mut self, t: f64) {
+        self.x += t * self.vx;
+        self.y += t * self.vy;
+        self._z += t * self._vz;
+    }
     fn future_x_y_collision(&self, other: &Self) -> Option<(f64, f64)> {
         //! Check if the two hailstones collide, excludingt the Z-axis, in the
         //! future for the two hailstones. If they do collide, returns the `(x,y)`
         //! pair of the collision.
         //!
-        //! If equation 1 is: y = ax + b
-        //! and equation 2 is y = cx + d,
-        //! then it can be shown that x_col = (d-b)/ (a-c)
+        //! If equation 1 is: `y = ax + b`
+        //! and equation 2 is `y = cx + d`,
+        //! then it can be shown that `x_col = (d-b)/ (a-c)`
+        //! where `a != c`
 
         //Assign a,c,d,c to make the logic easier to reason about
         let a = self.vy / self.vx;
@@ -67,10 +74,10 @@ impl Hailstone {
         Hailstone {
             x,
             y,
-            z,
+            _z: z,
             vx,
             vy,
-            vz,
+            _vz: vz,
         }
     }
 }
