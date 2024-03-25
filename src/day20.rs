@@ -1,6 +1,5 @@
-use std::collections::{HashMap, VecDeque};
-
 use crate::{read_input_file, SolveAdvent};
+use std::collections::{HashMap, VecDeque};
 
 pub struct Day20;
 
@@ -53,15 +52,13 @@ fn invoke_pulse_loop_via_button(module_map: &mut HashMap<String, PulseModule>) -
 
     while let Some(pulse_message) = pulse_message_queue.pop_front() {
         match pulse_message.state {
-            PulseType::High => {
-                high_pulses_sent += pulse_message.recipients.len();
-            }
+            PulseType::High => high_pulses_sent += pulse_message.recipients.len(),
             PulseType::Low => low_pulses_sent += pulse_message.recipients.len(),
         };
         for recipient_name in pulse_message.recipients.iter() {
             if let Some(module) = module_map.get_mut(recipient_name) {
                 //For each recipient of the message, react to the message. If a new pulse message needs to be
-                //sent out, but it at the back of the message queue.
+                //sent out, put it at the back of the message queue.
                 if let Some(next_pulse_module) = module.react_to_new_pulse(&pulse_message) {
                     pulse_message_queue.push_back(next_pulse_module);
                 }
@@ -72,8 +69,7 @@ fn invoke_pulse_loop_via_button(module_map: &mut HashMap<String, PulseModule>) -
 }
 
 ///A pulse message, which can be either
-/// 'high': represented as a 1,
-/// or 'low': represented as a 0, and the
+/// 'high' or 'low', and the
 /// recipient modules.
 #[derive(Debug)]
 struct PulseMessage {
@@ -90,7 +86,7 @@ struct PulseMessage {
 /// chain.
 #[derive(Debug, Clone)]
 enum PulseModuleKind {
-    ///FlipFlops maintain a state of either 1 or 0. This affect whether
+    ///FlipFlops maintain a state of either High or Low. This affect whether
     /// they send out a low or high pulse upon receiving a message.
     FlipFlop { state: PulseType },
     ///Conjunctions maintain a memory of the last input of each input
