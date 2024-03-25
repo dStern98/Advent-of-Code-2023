@@ -1,4 +1,4 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 
 pub struct Day24;
 
@@ -84,7 +84,7 @@ impl Hailstone {
 
 impl SolveAdvent for Day24 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let hailstones = file_as_str
             .lines()
             .map(Hailstone::from_line)

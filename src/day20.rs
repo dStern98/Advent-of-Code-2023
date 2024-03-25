@@ -1,12 +1,12 @@
 use std::collections::{HashMap, VecDeque};
 
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 
 pub struct Day20;
 
 impl SolveAdvent for Day20 {
     fn solve_part1(path_to_file: &str) {
-        let input_file = read_file_to_string(path_to_file);
+        let input_file = read_input_file(path_to_file);
         let pulse_modules = PulseModule::from_input_file(&input_file);
         let mut module_map = pulse_modules
             .into_iter()

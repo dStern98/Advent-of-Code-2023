@@ -1,11 +1,11 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::HashMap;
 
 pub struct Day15;
 
 impl SolveAdvent for Day15 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let init_sequence = file_as_str.split(',');
         let mut total_hash_value = 0;
         for sequence in init_sequence {
@@ -15,7 +15,7 @@ impl SolveAdvent for Day15 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let init_sequence = file_as_str.split(',');
 
         //Intialize the lens_map to contain all empty boxes from 0..255

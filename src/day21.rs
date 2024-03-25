@@ -1,4 +1,4 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::HashSet;
 
 pub struct Day21;
@@ -238,14 +238,14 @@ impl Garden {
 
 impl SolveAdvent for Day21 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let garden = Garden::new(&file_as_str);
         let position_of_s = garden.s_position();
         find_accessable_garden_plots(64, garden, position_of_s);
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let garden = Garden::new(&file_as_str);
         let position_of_s = garden.s_position();
         find_accessable_garden_plots_infinite(1000, garden, position_of_s);

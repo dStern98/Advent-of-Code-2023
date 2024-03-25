@@ -1,11 +1,11 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::{HashMap, HashSet};
 
 pub struct Day4;
 
 impl SolveAdvent for Day4 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let mut total_score_of_cards = 0;
         for line in file_as_str.lines() {
             let (_card_number, your_numbers, winning_numbers) = process_card(line);
@@ -22,7 +22,7 @@ impl SolveAdvent for Day4 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         //The card_counter HashMap stores how many of each card you have won. Intialize it to all to 1's
         let mut card_counter = HashMap::new();
         for i in 1..file_as_str.lines().count() + 1 {

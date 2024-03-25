@@ -1,11 +1,11 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::HashSet;
 
 pub struct Day10;
 
 impl SolveAdvent for Day10 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let pipe_map = PipeMap::new(&file_as_str);
         let (pipe_explorer1, pipe_explorer2) = pipe_map.find_two_pipes_connected_to_s();
         let furthest_distance = find_largest_distance_from_s(pipe_explorer1, pipe_explorer2);
@@ -16,7 +16,7 @@ impl SolveAdvent for Day10 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let pipe_map = PipeMap::new(&file_as_str);
         let (pipe_explorer1, pipe_explorer2) = pipe_map.find_two_pipes_connected_to_s();
         let known_pipe_locations =

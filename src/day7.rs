@@ -1,4 +1,4 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -8,7 +8,7 @@ const AVAILABLE_CARDS: [char; 12] = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5'
 
 impl SolveAdvent for Day7 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let mut processed_hands = process_into_poker_hands(file_as_str, false);
         //Because Ord trait is implemented for PokerHand, we can just sort the vec.
         processed_hands.sort();
@@ -21,7 +21,7 @@ impl SolveAdvent for Day7 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let mut poker_hands = process_into_poker_hands(file_as_str, true);
         for hand in poker_hands.iter_mut() {
             //For each hand, compute the best possible HandType using the wildcards.

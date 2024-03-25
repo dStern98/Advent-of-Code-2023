@@ -1,4 +1,4 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::HashMap;
 
 pub struct Day5;
@@ -29,7 +29,7 @@ impl SolveAdvent for Day5 {
 fn process_into_maps(fp: &str) -> (Vec<usize>, HashMap<String, String>) {
     //! Given the input fp, build a seeds vec (the inputs to the chain)
     //! and a HashMap of the map name to the maps items as a string.
-    let input_str = read_file_to_string(fp);
+    let input_str = read_input_file(fp);
     let mut final_string = String::new();
     let mut almanac_maps = HashMap::new();
     //For easier parsing, replace the empty lines with '|'.

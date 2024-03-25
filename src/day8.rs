@@ -1,11 +1,11 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::HashMap;
 
 pub struct Day8;
 
 impl SolveAdvent for Day8 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let (lr_pattern, lr_map) = process_input_file(file_as_str);
 
         let mut current_position = "AAA".to_owned();
@@ -26,7 +26,7 @@ impl SolveAdvent for Day8 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let (lr_pattern, lr_map) = process_input_file(file_as_str);
         //Start at all nodes the end with A
         let starting_nodes = lr_map

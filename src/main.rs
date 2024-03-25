@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::path::Path;
 
 mod day1;
 mod day10;
@@ -19,7 +20,10 @@ mod day7;
 mod day8;
 mod day9;
 
-pub fn read_file_to_string(fp: &str) -> String {
+pub fn read_input_file<P>(fp: P) -> String
+where
+    P: AsRef<Path>,
+{
     //! Given a file path, returns the entire file contents as a String.
     let file = File::open(fp).unwrap();
     let mut reader = BufReader::new(file);
@@ -30,8 +34,10 @@ pub fn read_file_to_string(fp: &str) -> String {
     buffer_string
 }
 
-//trait representing how to solve the days challenge for the advent calendar.
-//Obviously, part1 is for part1 and part2 is for part2.
+///trait representing how to solve the days challenge for the advent calendar.
+///Obviously, part1 is for part1 and part2 is for part2.
+/// The trait methods do not return anything, the answer to the problem
+/// should simply be printed.
 trait SolveAdvent {
     ///How to solve part1 of the days puzzle.
     fn solve_part1(path_to_file: &str);
@@ -41,5 +47,5 @@ trait SolveAdvent {
 
 fn main() {
     day20::Day20::solve_part1("input.txt");
-    // day24::Day24::solve_part2("test.txt");
+    day20::Day20::solve_part2("test.txt");
 }

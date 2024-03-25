@@ -1,11 +1,11 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 
 pub struct Day1;
 
 impl SolveAdvent for Day1 {
     fn solve_part1(path_to_file: &str) {
         let mut sum_of_calibration_values = 0;
-        let files_as_str = read_file_to_string(path_to_file);
+        let files_as_str = read_input_file(path_to_file);
         for line in files_as_str.lines() {
             sum_of_calibration_values += process_line_part1(line);
         }
@@ -14,7 +14,7 @@ impl SolveAdvent for Day1 {
 
     fn solve_part2(path_to_file: &str) {
         let mut sum_of_calibration_values = 0;
-        let files_as_str = read_file_to_string(path_to_file);
+        let files_as_str = read_input_file(path_to_file);
         for line in files_as_str.lines() {
             sum_of_calibration_values += process_line_part2(line);
         }

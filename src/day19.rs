@@ -1,11 +1,11 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::HashMap;
 
 pub struct Day19;
 
 impl SolveAdvent for Day19 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let (part_ratings, workflows) = process_into_workflows_ratings(file_as_str);
         let mut total_ratings_number = 0;
         for part in part_ratings {
@@ -30,7 +30,7 @@ impl SolveAdvent for Day19 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let (_, workflows) = process_into_workflows_ratings(file_as_str);
         //Walk all possible workflows
         let mut parsed_workflows = traverse_workflows_recursively(&"in".to_owned(), &workflows);

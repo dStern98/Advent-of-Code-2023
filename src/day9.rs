@@ -1,10 +1,10 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 
 pub struct Day9;
 
 impl SolveAdvent for Day9 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let mut adder_total = 0;
         for line in file_as_str.lines() {
             let line_split = line
@@ -17,7 +17,7 @@ impl SolveAdvent for Day9 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let mut adder_total = 0;
         for line in file_as_str.lines() {
             let line_split = line

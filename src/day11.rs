@@ -1,17 +1,17 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 use std::collections::{HashSet, VecDeque};
 
 pub struct Day11;
 
 impl SolveAdvent for Day11 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let universe = Universe::new(&file_as_str, 2);
         universe.find_minimum_distance_between_all_galaxies();
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let universe = Universe::new(&file_as_str, 1_000_000);
         universe.find_minimum_distance_between_all_galaxies();
     }

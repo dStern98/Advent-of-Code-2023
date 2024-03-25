@@ -1,10 +1,10 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 
 pub struct Day6;
 
 impl SolveAdvent for Day6 {
     fn solve_part1(path_to_file: &str) {
-        let files_as_str = read_file_to_string(path_to_file);
+        let files_as_str = read_input_file(path_to_file);
         let processed_race_numbers = process_input_file(files_as_str);
         let mut multiplicative_ways_to_win = 1;
         for (required_time, required_distance) in processed_race_numbers {
@@ -15,7 +15,7 @@ impl SolveAdvent for Day6 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let files_as_str = read_file_to_string(path_to_file);
+        let files_as_str = read_input_file(path_to_file);
         let (required_time, required_distance) = process_input_file_part2(files_as_str);
         let ways_to_win = ways_to_win_race(required_distance, required_time);
         println!("Ways to win single race: {}", ways_to_win);

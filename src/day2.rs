@@ -1,10 +1,10 @@
-use crate::{read_file_to_string, SolveAdvent};
+use crate::{read_input_file, SolveAdvent};
 
 pub struct Day2;
 
 impl SolveAdvent for Day2 {
     fn solve_part1(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let mut sum_of_game_powers = 0;
         for line in file_as_str.lines() {
             sum_of_game_powers += possible_game_part1(line);
@@ -13,7 +13,7 @@ impl SolveAdvent for Day2 {
     }
 
     fn solve_part2(path_to_file: &str) {
-        let file_as_str = read_file_to_string(path_to_file);
+        let file_as_str = read_input_file(path_to_file);
         let mut sum_of_possible_games = 0;
         for line in file_as_str.lines() {
             sum_of_possible_games += min_cube_counts_game_part2(line);
