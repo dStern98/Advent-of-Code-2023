@@ -7,4 +7,4 @@ from .day14 import SolveDay14
 
 if __name__ == "__main__":
     SolveDay14("input.txt").solve_part1()
-    # SolveDay14("test.txt").solve_part2()
+    SolveDay14("input.txt").solve_part2()
