@@ -6,25 +6,31 @@ class SolveDay14(SolveAdvent):
         RockSlider(self.file_content).slide_all_rocks_north()
 
     def solve_part2(self):
-        cycles_to_perform = 1_000_000_000
+        requested_cycles_to_perform = 1_000_000_000
         cycle_info = RockSlider(
             self.file_content
         ).spin_cycle(
-            cycles_to_perform,
+            requested_cycles_to_perform,
             break_on_cycle=True
         )
         if isinstance(cycle_info, tuple):
             cycle_start, cycle_end = cycle_info
             # We know the cycle repeats every cycle_delta iterations
             cycle_delta = cycle_end - cycle_start
-            optimized_cycles_to_perform = cycles_to_perform % cycle_delta
-            while optimized_cycles_to_perform < cycle_start:
-                optimized_cycles_to_perform += cycle_delta
+            # The equivalent_cycles_count must be greater than the cycle_start, which
+            # is the first observed instance of a cycle occurring.
+            cycles_mod_delta = requested_cycles_to_perform % cycle_delta
+            minimum_equivalent_cycles_count = ((cycle_start - cycles_mod_delta) //
+                                               cycle_delta + 1) * cycle_delta + cycles_mod_delta
             # The optimized cycle count should have the map in an equivalent state to the original cycles_to_perform
             print(
-                f"Optimized cycle count {optimized_cycles_to_perform} should be equivalent to {cycles_to_perform}")
+                f"Minimum equivalent cycle count: {minimum_equivalent_cycles_count} "
+                f"should be equivalent to {requested_cycles_to_perform}"
+            )
             cycle_info = RockSlider(
-                self.file_content).spin_cycle(optimized_cycles_to_perform, False)
+                self.file_content).spin_cycle(
+                minimum_equivalent_cycles_count,
+                break_on_cycle=False)
 
 
 class RockSlider:
@@ -106,7 +112,7 @@ class RockSlider:
         self.transpose_map()
         self.slide_all_rocks_west()
         self.transpose_map()
-        print(f"Total Load on North Platform is {self.north_support_load}")
+        print(f"Total Load on North Platform is: {self.north_support_load}")
 
     def cycle_once(self):
         """
@@ -157,4 +163,4 @@ class RockSlider:
                 # If the current map is not in the cycle_tracker, then log it
                 cycle_tracker[self.display_map] = cycle_number
         print(
-            f"Load on north beam after {requested_cycles} cycles is {self.north_support_load}")
+            f"Load on north beam after: {requested_cycles} cycles is: {self.north_support_load}")
