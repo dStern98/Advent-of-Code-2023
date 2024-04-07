@@ -13,6 +13,7 @@ mod day2;
 mod day20;
 mod day21;
 mod day24;
+mod day25;
 mod day4;
 mod day5;
 mod day6;
@@ -46,6 +47,6 @@ trait SolveAdvent {
 }
 
 fn main() {
-    day20::Day20::solve_part1("input.txt");
-    day20::Day20::solve_part2("test.txt");
+    day25::Day25::solve_part1("test.txt");
+    day25::Day25::solve_part2("test.txt");
 }
