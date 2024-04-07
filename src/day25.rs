@@ -1,4 +1,5 @@
 use crate::{read_input_file, SolveAdvent};
+use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
 pub struct Day25;
@@ -6,11 +7,12 @@ pub struct Day25;
 impl SolveAdvent for Day25 {
     fn solve_part1(path_to_file: &str) {
         let wire_map = WireMap::from_input_file(path_to_file);
-        let unique_connection_permutations = construct_all_triplets(wire_map.connections.len());
+        let unique_connection_permutations = (0..wire_map.connections.len()).combinations(3);
+
         println!(
-            "Wire map has {} connections and {} triplets to remove",
+            "Wire map has {} connections and {} wire triplets to test",
             wire_map.connections.len(),
-            unique_connection_permutations.len()
+            unique_connection_permutations.clone().count()
         );
         for (index, connections_to_remove) in unique_connection_permutations.into_iter().enumerate()
         {
@@ -29,44 +31,6 @@ impl SolveAdvent for Day25 {
     fn solve_part2(path_to_file: &str) {
         let _ = path_to_file;
     }
-}
-
-fn construct_all_triplets(connections_count: usize) -> HashSet<(usize, usize, usize)> {
-    let all_connection_permutations =
-        recursively_build_connection_triplets((0..connections_count).collect::<Vec<_>>(), 0);
-    let unique_connection_permutations = all_connection_permutations
-        .into_iter()
-        .map(|mut triplet| {
-            triplet.sort();
-            let triplet = (triplet[0], triplet[1], triplet[2]);
-            triplet
-        })
-        .collect::<HashSet<_>>();
-    unique_connection_permutations
-}
-
-fn recursively_build_connection_triplets(
-    numbers_to_choose_from: Vec<usize>,
-    depth: u8,
-) -> Vec<Vec<usize>> {
-    if depth == 3 {
-        return vec![vec![]];
-    }
-    let mut responses = Vec::new();
-    for available_number in numbers_to_choose_from.iter() {
-        let new_numbers_to_choose_from = numbers_to_choose_from
-            .iter()
-            .copied()
-            .filter(|number| number != available_number)
-            .collect::<Vec<_>>();
-        let mut possible_combinations =
-            recursively_build_connection_triplets(new_numbers_to_choose_from, depth + 1);
-        for possible_combination in possible_combinations.iter_mut() {
-            possible_combination.push(*available_number);
-        }
-        responses.extend(possible_combinations);
-    }
-    responses
 }
 
 #[derive(Debug, Clone)]
@@ -124,17 +88,15 @@ impl WireMap {
 
 fn try_removing_connections(
     wire_map: &WireMap,
-    connections_to_remove: (usize, usize, usize),
+    connections_to_remove: Vec<usize>,
 ) -> Option<usize> {
     //! Given the 3 wires to remove from the wire map, create a copy of the `connections_map` but with
     //! those three connections removed.
     let mut connection_map_probe = wire_map.connections_map.clone();
-    let (conn1, conn2, conn3) = connections_to_remove;
-    let connections_to_remove = vec![
-        wire_map.connections.get(conn1).unwrap(),
-        wire_map.connections.get(conn2).unwrap(),
-        wire_map.connections.get(conn3).unwrap(),
-    ];
+    let connections_to_remove = connections_to_remove
+        .into_iter()
+        .map(|connection_to_remove| wire_map.connections.get(connection_to_remove).unwrap())
+        .collect::<Vec<_>>();
     //For the 3 connections chosen to be removed, remove them from the Wire Map.
     for (left_wire, right_wire) in connections_to_remove {
         connection_map_probe
@@ -190,15 +152,4 @@ fn explore_wire(connection_map_probe: &HashMap<String, HashSet<String>>) -> Hash
         }
     }
     visited_tracker
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_combinations() {
-        // It is a fact that 33 choose 3 is 5456.
-        let unique_combinations = construct_all_triplets(33);
-        assert_eq!(unique_combinations.len(), 5456);
-    }
 }
