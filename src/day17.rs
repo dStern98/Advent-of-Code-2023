@@ -1,5 +1,6 @@
 use crate::{read_input_file, SolveAdvent};
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::time::Instant;
 
 pub struct Day17;
 
@@ -7,9 +8,11 @@ impl SolveAdvent for Day17 {
     fn solve_part1(path_to_file: &str) {
         let file_contents = read_input_file(path_to_file);
         let number_maze = NumberMaze::new(file_contents);
+        let now = Instant::now();
         let best_possible_heat_losss = find_best_path_through_maze(number_maze);
+        println!("Maze traversal completed in {:?}", now.elapsed());
         println!(
-            "Best possible heat loss traversing the maze is {}",
+            "Best possible heat loss traversing the maze is: {}",
             best_possible_heat_losss
         );
     }
@@ -59,11 +62,11 @@ struct MazeProbe<'a> {
 }
 
 fn opposite_direction(dir: &char) -> char {
-    match dir {
-        &'R' => 'L',
-        &'L' => 'R',
-        &'U' => 'D',
-        &'D' => 'U',
+    match *dir {
+        'R' => 'L',
+        'L' => 'R',
+        'U' => 'D',
+        'D' => 'U',
         _ => panic!("Received an illegal direction {dir}"),
     }
 }
@@ -97,7 +100,10 @@ impl<'a> MazeProbe<'a> {
             && self.col as usize == self.maze.maze[0].len() - 1
     }
 
-    fn last_three_moves_repr(&self) -> Option<String> {
+    fn move_history_repr(&self) -> Option<String> {
+        //! Optionally return a string representing the relevant history of this
+        //! Probe. This will be the last n items in the history equal to the latest value in the history.
+        //! So if the history was `[Up, Down, Down]`, then the returned string would be `DD`.
         if self.last_three_moves.is_empty() {
             return None;
         }
@@ -105,7 +111,7 @@ impl<'a> MazeProbe<'a> {
         let last_move = self.last_three_moves.iter().last().unwrap();
         for char in self.last_three_moves.iter().rev() {
             if char == last_move {
-                repr.push_front(char.clone())
+                repr.push_front(*char)
             } else {
                 break;
             }
@@ -126,7 +132,7 @@ impl<'a> MazeProbe<'a> {
             .unwrap();
         self.visited.insert((self.row, self.col));
         //Record the current point in self's history, with the current heat_loss.
-        if let Some(move_repr) = self.last_three_moves_repr() {
+        if let Some(move_repr) = self.move_history_repr() {
             let map_key = (self.row, self.col, move_repr);
             self.history.insert(map_key, self.heat_loss);
         }
@@ -169,7 +175,7 @@ impl<'a> MazeProbe<'a> {
             visited: self.visited.clone(),
             heat_loss: self.heat_loss,
             last_three_moves: self.last_three_moves.clone(),
-            maze: &self.maze,
+            maze: self.maze,
         };
         //Never construct a MazeRunner that is out of bounds, or that is in a cycle
         if !new_probe.is_inbounds() || new_probe.visited.contains(&(new_probe.row, new_probe.col)) {
@@ -204,16 +210,16 @@ fn optimize_using_history(
     maze_runner: &MazeProbe,
     optimizer: &mut HashMap<MapKey, i32>,
 ) -> OptimizerOutcomes {
-    let move_repr = match maze_runner.last_three_moves_repr() {
+    let move_repr = match maze_runner.move_history_repr() {
         Some(repr) => repr,
         None => return OptimizerOutcomes::InsufficientInfo,
     };
-    let map_key = (maze_runner.row, maze_runner.col, move_repr);
-    if let Some(current_min) = optimizer.get_mut(&map_key) {
-        if *current_min > maze_runner.heat_loss {
+    let map_key = (maze_runner.row, maze_runner.col, move_repr.clone());
+    if let Some(best_observed_loss) = optimizer.get_mut(&map_key) {
+        if *best_observed_loss > maze_runner.heat_loss {
             //If the current min is greater than heat_loss of current probe, then change
             // the recorded min to the heat loss.
-            *current_min = maze_runner.heat_loss;
+            *best_observed_loss = maze_runner.heat_loss;
             //Return Some to indicate that a new best heat_loss has been recorded for the current map_key.
             //This means that some probes can be removed from the queue.
             return OptimizerOutcomes::NewBestProbe(map_key);
@@ -223,6 +229,28 @@ fn optimize_using_history(
         return OptimizerOutcomes::BadCurrentProbe;
     }
 
+    if move_repr.len() > 1 {
+        //It is worth remembering that a Probe whose last 3 moves was UUD will have all of the same
+        //freedoms as a DDD and more! Therefore, if the current probe has either moved 2 or 3 moves in the same
+        //direction in a row, we can still check if a probe that has moved only 1 consecutive moves in the same direction
+        //did better than this probe. If so, we can still kill this probe.
+        let last_move = move_repr.chars().last().unwrap().to_string();
+        let mut extra_move_reprs = vec![last_move.clone()];
+        if move_repr.len() == 3 {
+            extra_move_reprs.push(format!("{}{}", last_move, last_move));
+        }
+        for extra_move_repr in extra_move_reprs {
+            let map_key2 = (maze_runner.row, maze_runner.col, extra_move_repr);
+            if let Some(best_observed_loss) = optimizer.get_mut(&map_key2) {
+                if *best_observed_loss <= maze_runner.heat_loss {
+                    //If current_min is <= the maze_runners heat loss, than the current maze runner
+                    //should be removed from the queue.
+                    return OptimizerOutcomes::BadCurrentProbe;
+                }
+            }
+        }
+    }
+
     //If we have not already returned, then the current map_key is not in the optimizer at all,
     //so just insert a new entry for it and return.
     optimizer.insert(map_key, maze_runner.heat_loss);
@@ -230,17 +258,19 @@ fn optimize_using_history(
 }
 
 fn find_best_path_through_maze(number_maze: NumberMaze) -> i32 {
+    //! Perform a Depth-first search. Use the optimizer (a hashmap mapping (row, col, repr) to best observed heat loss).
+    //! The mentioned repr is a string representing how many consecutive moves in a row the probe has moved.
+    //! Without the optimizer and the associated `optimize_using_history` function, this function could take 1000 years
+    //! to complete.
     let mut min_accumulated_heat_loss = i32::MAX;
     let mut maze_probe_bfs_queue = VecDeque::from([MazeProbe::first_runner(&number_maze)]);
     let mut optimizer = HashMap::new();
-
     while let Some(mut maze_runner) = maze_probe_bfs_queue.pop_front() {
         maze_runner.visit();
         if maze_runner.reached_target() {
             min_accumulated_heat_loss = min_accumulated_heat_loss.min(maze_runner.heat_loss);
             continue;
         }
-
         match optimize_using_history(&maze_runner, &mut optimizer) {
             OptimizerOutcomes::BadCurrentProbe => {
                 //If the current probe is bad, then do not spawn new probes
@@ -271,9 +301,7 @@ fn find_best_path_through_maze(number_maze: NumberMaze) -> i32 {
         .into_iter()
         .flatten()
         .collect::<Vec<MazeProbe>>();
-
         maze_probe_bfs_queue.extend(next_moves);
     }
-
     min_accumulated_heat_loss
 }

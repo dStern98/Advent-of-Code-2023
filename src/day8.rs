@@ -17,9 +17,9 @@ impl SolveAdvent for Day8 {
             steps += 1;
             let (left_path, right_path) = lr_map.get(&current_position).unwrap();
             if step == 'L' {
-                current_position = left_path.to_owned();
+                left_path.clone_into(&mut current_position);
             } else {
-                current_position = right_path.to_owned();
+                right_path.clone_into(&mut current_position);
             }
         }
         println!("Reached ZZZ in {} steps", steps);
@@ -46,9 +46,9 @@ impl SolveAdvent for Day8 {
                 steps += 1;
                 let (left_path, right_path) = lr_map.get(&current_position).unwrap();
                 if step == 'L' {
-                    current_position = left_path.to_owned();
+                    left_path.clone_into(&mut current_position);
                 } else {
-                    current_position = right_path.to_owned();
+                    right_path.clone_into(&mut current_position);
                 }
             }
             steps_to_reach_ending_in_z.push(steps);

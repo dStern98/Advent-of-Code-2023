@@ -109,7 +109,7 @@ fn try_removing_connections(
             .remove(left_wire);
     }
     //Make sure that all keys mapped to an empty set are removed.
-    connection_map_probe.retain(|_k, v| v.len() > 0);
+    connection_map_probe.retain(|_k, v| !v.is_empty());
 
     let mut partition_group_sizes = Vec::new();
     while !connection_map_probe.is_empty() {
