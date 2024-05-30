@@ -1,6 +1,6 @@
 ### General Description
 
-I am working through the Advent of Code challenges for 2023, as can be found [here](https://adventofcode.com/2023). All solutions are either in Python or Rust. I currently have `40` stars. Each day's challenge has two parts. Each day's solution can be found in that day's particular file (for example, day 15 would be found in `day15.rs`).
+I am working through the Advent of Code challenges for 2023, as can be found [here](https://adventofcode.com/2023). All solutions are either in Python or Rust. I currently have `41` stars. Each day's challenge has two parts. Each day's solution can be found in that day's particular file (for example, day 15 would be found in `day15.rs`).
 
 ![Latest Dashboard](./advent_dashboard.png)
 

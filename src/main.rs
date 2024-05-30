@@ -50,5 +50,5 @@ trait SolveAdvent {
 
 fn main() {
     day22::Day22::solve_part1("input.txt");
-    day22::Day22::solve_part2("test.txt");
+    day22::Day22::solve_part2("input.txt");
 }

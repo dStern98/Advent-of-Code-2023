@@ -5,21 +5,34 @@ pub struct Day22;
 
 impl SolveAdvent for Day22 {
     fn solve_part1(path_to_file: &str) {
-        let file_contents = read_input_file(path_to_file);
-        let mut bricks = file_contents
-            .lines()
-            .zip((0..).into_iter().cycle())
-            .map(|(line, uuid)| Brick::from_line(line, uuid))
-            .collect::<Vec<_>>();
-        bricks.sort_by_key(|brick| -brick.lower_bound.2);
+        let bricks = construct_bricks_from_file(path_to_file);
         let bricks = descend_bricks(bricks);
         let bricks_safe_to_remove = find_bricks_safe_to_disintegrate(bricks);
         println!("There are {} bricks safe to remove", bricks_safe_to_remove);
     }
 
     fn solve_part2(path_to_file: &str) {
-        let _ = path_to_file;
+        let bricks = construct_bricks_from_file(path_to_file);
+        let bricks = descend_bricks(bricks);
+        let total_bricks_removed = find_sum_of_brick_chain_reaction(bricks);
+        println!(
+            "Through chain reaction, a total of {} bricks can be removed",
+            total_bricks_removed
+        );
     }
+}
+
+fn construct_bricks_from_file(fp: &str) -> Vec<Brick> {
+    //! Construct a Vec of Bricks from the input file contents.
+    //! This bricks are sorted based on the z-axis lower-bound, but are not descended.
+    let file_contents = read_input_file(fp);
+    let mut bricks = file_contents
+        .lines()
+        .zip((0..).cycle())
+        .map(|(line, uuid)| Brick::from_line(line, uuid))
+        .collect::<Vec<_>>();
+    bricks.sort_by_key(|brick| -brick.lower_bound.2);
+    bricks
 }
 
 ///Represents a single brick in the pile
@@ -32,16 +45,16 @@ struct Brick {
 }
 
 impl Brick {
-    fn find_supported_bricks(&self, bricks_directly_above: &[&Brick]) -> HashSet<i32> {
+    fn filter_by_xy_overlap(&self, bricks_to_assess: &[&Brick]) -> HashSet<i32> {
         //! Return a set of all the bricks above `self` that have an xy-overlap.
         //! This means that `self` is one of the bricks that holds up all of the bricks in `bricks_self_holds_up`
-        let mut bricks_self_holds_up = HashSet::new();
-        for brick_directly_above in bricks_directly_above {
-            if brick_directly_above.check_xy_overlap(self) {
-                bricks_self_holds_up.insert(brick_directly_above.uuid);
+        let mut bricks_with_xy_overlap = HashSet::new();
+        for brick_to_assess in bricks_to_assess {
+            if brick_to_assess.check_xy_overlap(self) {
+                bricks_with_xy_overlap.insert(brick_to_assess.uuid);
             }
         }
-        bricks_self_holds_up
+        bricks_with_xy_overlap
     }
     fn move_brick_z_position(&mut self, new_z_lower_bound: i32) {
         //! Mutate the current brick's z-position so that the lowest end of the z
@@ -191,12 +204,9 @@ fn find_bricks_safe_to_disintegrate(bricks: Vec<Brick>) -> i32 {
         if let Some(bricks_directly_above) =
             brick_height_map.get(&(brick_to_assess.upper_bound.2 + 1))
         {
-            let supported_bricks = brick_to_assess.find_supported_bricks(&bricks_directly_above);
-            if !supported_bricks.is_empty() {
-                brick_dependency_map.insert(
-                    brick_to_assess.uuid,
-                    brick_to_assess.find_supported_bricks(&bricks_directly_above),
-                );
+            let dependent_bricks = brick_to_assess.filter_by_xy_overlap(bricks_directly_above);
+            if !dependent_bricks.is_empty() {
+                brick_dependency_map.insert(brick_to_assess.uuid, dependent_bricks);
                 continue;
             }
         }
@@ -225,4 +235,63 @@ fn find_bricks_safe_to_disintegrate(bricks: Vec<Brick>) -> i32 {
         }
     }
     bricks_safe_to_remove
+}
+
+fn find_sum_of_brick_chain_reaction(bricks: Vec<Brick>) -> i32 {
+    //! Solve Part2 of the problem by simulating the chain reaction caused
+    //! by removing a single brick.
+
+    //Unlike the Part1 solution, here we want to key the brick_height_map
+    //by each bricks upper_bound on the z-axis.
+    let mut brick_height_map: HashMap<i32, Vec<&Brick>> = HashMap::new();
+    for brick in bricks.iter() {
+        brick_height_map
+            .entry(brick.upper_bound.2)
+            .or_default()
+            .push(brick);
+    }
+
+    //Construct a map of each brick to all of the bricks that is holding the brick up (bricks
+    // whose upper bound is 1 below the lower_bound of the current brick on the z-axis, with an xy overlap)
+    //This is the opposite of the part1 solution, where we map based upon bricks depending on the current brick.
+    let mut brick_dependency_map = HashMap::new();
+    for brick_to_assess in bricks.iter() {
+        if let Some(below) = brick_height_map.get(&(brick_to_assess.lower_bound.2 - 1)) {
+            let bricks_supporting = brick_to_assess.filter_by_xy_overlap(below);
+            if !bricks_supporting.is_empty() {
+                brick_dependency_map.insert(brick_to_assess.uuid, bricks_supporting);
+                continue;
+            }
+        }
+    }
+
+    //Simulate the chain reaction of removing a single brick
+    let mut total_bricks_removed = 0;
+    for brick in bricks.iter() {
+        total_bricks_removed += brick_chain_reaction(brick.uuid, brick_dependency_map.clone());
+    }
+    total_bricks_removed
+}
+
+fn brick_chain_reaction(brick_to_remove: i32, mut brick_map: HashMap<i32, HashSet<i32>>) -> i32 {
+    //!Simulate a chain reaction from removing the `brick_to_remove`.
+    let mut visited = HashSet::new();
+    let mut collapsed_brick_stack = vec![brick_to_remove];
+    while let Some(brick_to_remove) = collapsed_brick_stack.pop() {
+        if visited.contains(&brick_to_remove) {
+            continue;
+        }
+        visited.insert(brick_to_remove);
+
+        //Iterate over the Map, and remove the brick_to_remove from the supporting bricks vec.
+        //After removal, if the bricks_supporting array is empty, then the brick being considered
+        //is no longer supported, and therefore will also collapse. Continue the chain reaction.
+        for (brick_uuid, bricks_supporting) in brick_map.iter_mut() {
+            bricks_supporting.remove(&brick_to_remove);
+            if bricks_supporting.is_empty() {
+                collapsed_brick_stack.push(*brick_uuid);
+            }
+        }
+    }
+    visited.len() as i32 - 1
 }
